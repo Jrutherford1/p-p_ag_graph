@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Enterprise Taxonomy Visualization</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+    <style>
+        body { 
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+        }
+        .node circle {
+            fill: #69b3a2;
+            stroke: #fff;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+        .node text {
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .node--internal circle {
+            fill: #fff;
+        }
+        .link {
+            fill: none;
+            stroke: #ccc;
+            stroke-width: 1px;
+        }
+        .popup {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            max-width: 300px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div id="graph"></div>
+    <div id="popup" class="popup"></div>
+    <script>
+        // Article mappings
+        const articleMappings = {
+            "Digital Services": [
+                "One platform, multiple options - New CLAAS connect digital ecosystem launches in 2024",
+                "CropX and CNH Announce Digital Connection for Sustainable Precision Farming"
+            ],
+            "Technology": [
+                "John Deere: Pioneering the Future with Agricultural IoT Technology",
+                "Developing a Functional User Interface for VR Simulations within Agricultural Equipment Contexts"
+            ],
+            "Distribution": [
+                "CLAAS Addresses Gap in Dealer Network",
+                "CLAAS and Butler Machinery Company Announce Transition Plans in Dakotas",
+                "John Deere Parts Distribution Center Network Strategy"
+            ],
+            "Research and Development": [
+                "Studies of tractor maintenance and replacement strategies of Wonji Shoa Factory",
+                "Inserting machines, displacing people: how automation imaginaries for agriculture promise 'liberation'"
+            ],
+            "Performance": [
+                "CNH Industrial: 1Q24 Wrap & Model Update",
+                "CNH Industrial: 2Q24 Review: Adjusting Estimates; Keeping PT",
+                "Agricultural Machinery: 2Q24 Earnings Preview: North America Shoe Dropping"
+            ]
+        };
+
+        // Your exact working data structure from before
+        const data = {
+            name: "Enterprise",
+            children: [
+                {
+                    name: "Performance",
+                    children: [
+                        {
+                            name: "Market Share"
+                        },
+                        {
+                            name: "Leadership",
+                            children: [
+                                { name: "Investors" },
+                                { name: "Governance" },
+                                { name: "Followers" },
+                                { name: "Manufacturers" },
+                                { name: "Commitment" }
+                            ]
+                        },
+                        {
+                            name: "Required Doc",
+                            children: [
+                                { name: "Bank Values" },
+                                { name: "Goal" }
+                            ]
+                        },
+                        { name: "Thought Leadership" }
+                    ]
+                },
+                {
+                    name: "Finance",
+                    children: [
+                        { name: "Investment" },
+                        {
+                            name: "Grid",
+                            children: [
+                                { name: "Strategy" },
+                                { name: "Campaigns" }
+                            ]
+                        },
+                        {
+                            name: "ROI",
+                            children: [
+                                {
+                                    name: "BSC",
+                                    children: [
+                                        { name: "Strategy" },
+                                        { name: "Campaigns" }
+                                    ]
+                                },
+                                {
+                                    name: "Marketing",
+                                    children: [
+                                        { name: "Strategy" },
+                                        { name: "Campaigns" }
+                                    ]
+                                }
+                            ]
+                        },
+                        {
+                            name: "Benefits",
+                            children: [
+                                { name: "Lifestyle" },
+                                {
+                                    name: "Reports",
+                                    children: [
+                                        { name: "Monitoring" },
+                                        { name: "Competition" },
+                                        { name: "Safety" }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Supply Chain",
+                    children: [
+                        { name: "Supply Forecasting" },
+                        { name: "OCM" },
+                        { name: "Third Party" },
+                        { name: "Inventory Management" },
+                        { name: "DC Strategy" },
+                        {
+                            name: "Distribution",
+                            children: [
+                                { name: "Costs" },
+                                { name: "Dealership Distribution" },
+                                {
+                                    name: "Locations",
+                                    children: [
+                                        {
+                                            name: "APAC",
+                                            children: [
+                                                { name: "Country A" },
+                                                { name: "Country B" }
+                                            ]
+                                        },
+                                        {
+                                            name: "EMEA",
+                                            children: [
+                                                { name: "Country A" },
+                                                { name: "Country B" }
+                                            ]
+                                        },
+                                        {
+                                            name: "North America",
+                                            children: [
+                                                { name: "Country A" },
+                                                { name: "Country B" }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    name: "Technology",
+                    children: [
+                        { name: "Product Technology" },
+                        {
+                            name: "Research and Development",
+                            children: [
+                                { name: "IP Risk" },
+                                { name: "White Papers" },
+                                { name: "Patents" }
+                            ]
+                        },
+                        { name: "Digital Services" }
+                    ]
+                },
+                {
+                    name: "Legal",
+                    children: [
+                        { name: "Right to Repair" },
+                        { name: "Agreements" },
+                        { name: "Licenses" },
+                        {
+                            name: "Operating Standards",
+                            children: [
+                                { name: "Location" },
+                                { name: "Commission" },
+                                { name: "Expansion" }
+                            ]
+                        },
+                        {
+                            name: "Challenges",
+                            children: [
+                                { name: "Inventory" },
+                                { name: "Competition" },
+                                { name: "Technology" },
+                                { name: "Sales" }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        };
+
+        const width = 1200;
+        const height = 800;
+        const margin = {top: 20, right: 120, bottom: 20, left: 120};
+
+        const svg = d3.select("#graph")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        const treeLayout = d3.tree()
+            .size([height - margin.top - margin.bottom, width - margin.left - margin.right]);
+
+        const root = d3.hierarchy(data);
+
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
+
+        root.children.forEach(collapse);
+
+        let i = 0;
+
+        function update(source) {
+            const treeData = treeLayout(root);
+            const nodes = treeData.descendants();
+            const links = treeData.links();
+
+            nodes.forEach(d => {
+                d.y = d.depth * 180;
+            });
+
+            const node = svg.selectAll(".node")
+                .data(nodes, d => d.id || (d.id = ++i));
+
+            const nodeEnter = node.enter().append("g")
+                .attr("class", "node")
+                .attr("transform", d => `translate(${source.y0 || source.y},${source.x0 || source.x})`)
+                .on("click", function(event, d) {
+                    event.stopPropagation();
+                    
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    } else {
+                        d.children = d._children;
+                        d._children = null;
+                    }
+                    update(d);
+
+                    // Show articles if they exist
+                    const articles = articleMappings[d.data.name];
+                    const popup = document.getElementById('popup');
+                    
+                    if (articles && articles.length > 0) {
+                        const articleList = `
+                            <h4>Related Articles for ${d.data.name}:</h4>
+                            <ul>
+                                ${articles.map(article => `<li>${article}</li>`).join('')}
+                            </ul>
+                        `;
+                        
+                        popup.innerHTML = articleList;
+                        popup.style.display = 'block';
+                        popup.style.left = (event.pageX + 10) + 'px';
+                        popup.style.top = (event.pageY - 10) + 'px';
+                    } else {
+                        popup.style.display = 'none';
+                    }
+                });
+
+            nodeEnter.append("circle")
+                .attr("r", 6)
+                .style("fill", d => d._children ? "#69b3a2" : "#fff");
+
+            nodeEnter.append("text")
+                .attr("dy", ".35em")
+                .attr("x", d => d.children || d._children ? -13 : 13)
+                .style("text-anchor", d => d.children || d._children ? "end" : "start")
+                .text(d => d.data.name);
+
+            const nodeUpdate = nodeEnter.merge(node);
+            nodeUpdate.transition()
+                .duration(750)
+                .attr("transform", d => `translate(${d.y},${d.x})`);
+
+            nodeUpdate.select("circle")
+                .attr("r", 6)
+                .style("fill", d => d._children ? "#69b3a2" : "#fff")
+                .attr("cursor", "pointer");
+
+            const nodeExit = node.exit().transition()
+                .duration(750)
+                .attr("transform", d => `translate(${source.y},${source.x})`)
+                .remove();
+
+            nodeExit.select("circle")
+                .attr("r", 1e-6);
+
+            nodeExit.select("text")
+                .style("fill-opacity", 1e-6);
+
+            const link = svg.selectAll(".link")
+                .data(links, d => d.target.id);
+
+            const linkEnter = link.enter().insert("path", "g")
+                .attr("class", "link")
+                .attr("d", d3.linkHorizontal()
+                    .x(d => source.y0 || source.y)
+                    .y(d => source.x0 || source.x));
+
+            linkEnter.merge(link).transition()
+                .duration(750)
+                .attr("d", d3.linkHorizontal()
+                    .x(d => d.y)
+                    .y(d => d.x));
+
+            link.exit().transition()
+                .duration(750)
+                .attr("d", d3.linkHorizontal()
+                    .x(d => source.y)
+                    .y(d => source.x))
+                .remove();
+
+            nodes.forEach(d => {
+                d.x0 = d.x;
+                d.y0 = d.y;
+            });
+        }
+
+        // Hide popup when clicking outside
+        document.addEventListener('click', (event) => {
+            const popup = document.getElementById('popup');
+            const isClickInsidePopup = popup.contains(event.target);
+            const isClickOnNode = event.target.closest('.node');
+            
+            if (!isClickInsidePopup && !isClickOnNode) {
+                popup.style.display = 'none';
+            }
+        });
+
+        root.x0 = height / 2;
+        root.y0 = 0;
+        update(root);
+    </script>
+</body>
+</html>
